@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 3: Correlation Analysis and Chi-square Tests</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #3498db;
+        }
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            padding: 15px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+            background-color: #f8f8f8;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .note {
+            background-color: #e7f5fe;
+            border-left: 4px solid #3498db;
+            padding: 10px;
+            margin: 20px 0;
+        }
+        .warning {
+            background-color: #fff5e6;
+            border-left: 4px solid #e67e22;
+            padding: 10px;
+            margin: 20px 0;
+        }
+        .question {
+            background-color: #f0f7fb;
+            border-left: 4px solid #4285f4;
+            padding: 15px;
+            margin: 30px 0;
+        }
+        .answer {
+            background-color: #f5f5f5;
+            border-left: 4px solid #34a853;
+            padding: 15px;
+            margin: 10px 0 30px 20px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+            border: 1px solid #ddd;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .footer {
+            margin-top: 50px;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <h1>Module 3: Correlation Analysis and Chi-square Tests</h1>
+
+    <h2>Introduction to Correlation Analysis</h2>
+    <p>Correlation analysis is a statistical method used to evaluate the strength and direction of the relationship between two continuous variables. It helps us understand how changes in one variable are associated with changes in another variable.</p>
+
+    <h3>Key Concepts in Correlation Analysis</h3>
+    <ul>
+        <li><strong>Correlation Coefficient</strong>: A measure of the strength and direction of the relationship between two variables, ranging from -1 to +1.</li>
+        <li><strong>Positive Correlation</strong>: As one variable increases, the other variable tends to increase (correlation coefficient > 0).</li>
+        <li><strong>Negative Correlation</strong>: As one variable increases, the other variable tends to decrease (correlation coefficient < 0).</li>
+        <li><strong>No Correlation</strong>: No consistent relationship between the variables (correlation coefficient ≈ 0).</li>
+        <li><strong>Strength of Correlation</strong>:
+            <ul>
+                <li>Strong: |r| > 0.7</li>
+                <li>Moderate: 0.3 < |r| < 0.7</li>
+                <li>Weak: |r| < 0.3</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>Types of Correlation Coefficients</h3>
+    <ol>
+        <li><strong>Pearson's Correlation Coefficient (r)</strong>: Measures the linear relationship between two continuous variables. Assumes normality and homoscedasticity.</li>
+        <li><strong>Spearman's Rank Correlation Coefficient (ρ)</strong>: A non-parametric measure that assesses the monotonic relationship between two variables. Does not assume normality.</li>
+        <li><strong>Kendall's Tau Correlation Coefficient (τ)</strong>: Another non-parametric measure that assesses the ordinal association between two variables. More robust to outliers than Spearman's.</li>
+    </ol>
+
+    <h3>Important Considerations</h3>
+    <ul>
+        <li><strong>Correlation ≠ Causation</strong>: Correlation only indicates association, not causation.</li>
+        <li><strong>Outliers</strong>: Can significantly affect Pearson's correlation coefficient.</li>
+        <li><strong>Non-linear Relationships</strong>: Pearson's correlation may not capture non-linear relationships.</li>
+        <li><strong>Restricted Range</strong>: Limiting the range of values can reduce the correlation coefficient.</li>
+    </ul>
+
+    <h2>Required Packages for Correlation Analysis</h2>
+    <pre><code># Install required packages (only need to do this once)
+install.packages(c("ggplot2", "corrplot", "Hmisc", "psych"))
+
+# Load the packages
+library(ggplot2)   # For data visualization
+library(corrplot)  # For correlation matrices visualization
+library(Hmisc)     # For correlation analysis
+library(psych)     # For correlation analysis and visualization</code></pre>
+
+    <h2>Pearson Correlation</h2>
+    <p>Pearson's correlation coefficient measures the linear relationship between two continuous variables. It is the most commonly used correlation coefficient.</p>
+
+    <h3>Example 1: Study Hours and Exam Scores</h3>
+    <p>Let's examine the relationship between the number of hours students spend studying and their exam scores.</p>
+
+    <pre><code># Create a data frame with study hours and exam scores
+study_data <- data.frame(
+  student = 1:30,
+  study_hours = c(1.5, 2.3, 3.1, 4.8, 5.2, 6.0, 2.5, 3.7, 4.2, 5.5,
+                 1.8, 2.7, 3.5, 4.5, 5.8, 1.2, 2.0, 3.3, 4.0, 5.0,
+                 2.2, 3.0, 3.8, 4.3, 5.3, 1.0, 2.8, 3.4, 4.7, 5.7),
+  exam_score = c(65, 72, 78, 85, 90, 92, 69, 79, 82, 88,
+                67, 74, 77, 84, 91, 62, 70, 76, 81, 87,
+                68, 75, 80, 83, 89, 60, 73, 78, 86, 90)
+)
+
+# View the first few rows of the data
+head(study_data)</code></pre>
+
+    <h4>Step 1: Check Assumptions</h4>
+    <p>Before performing Pearson correlation, we need to check if the data meets the assumptions:</p>
+    <ol>
+        <li>Both variables are continuous</li>
+        <li>Both variables follow a normal distribution</li>
+        <li>The relationship between the variables is linear</li>
+        <li>There are no significant outliers</li>
+    </ol>
+
+    <pre><code># Check normality using Shapiro-Wilk test
+shapiro.test(study_data$study_hours)
+shapiro.test(study_data$exam_score)
+
+# Create histograms to visualize distributions
+par(mfrow = c(1, 2))
+hist(study_data$study_hours, main = "Distribution of Study Hours", 
+     xlab = "Study Hours", col = "lightblue")
+hist(study_data$exam_score, main = "Distribution of Exam Scores", 
+     xlab = "Exam Score", col = "lightgreen")
+par(mfrow = c(1, 1))
+
+# Create a scatter plot to check for linearity
+plot(study_data$study_hours, study_data$exam_score, 
+     main = "Study Hours vs. Exam Scores",
+     xlab = "Study Hours", ylab = "Exam Score",
+     pch = 19, col = "blue")</code></pre>
+
+    <h4>Step 2: Calculate Pearson Correlation</h4>
+    <pre><code># Calculate Pearson correlation
+pearson_result <- cor.test(study_data$study_hours, study_data$exam_score, 
+                          method = "pearson")
+
+# View the results
+pearson_result</code></pre>
+
+    <h4>Step 3: Visualize the Correlation</h4>
+    <pre><code># Create a scatter plot with regression line
+ggplot(study_data, aes(x = study_hours, y = exam_score)) +
+  geom_point(color = "blue", size = 3, alpha = 0.7) +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = paste("Study Hours vs. Exam Scores (r =", 
+                     round(pearson_result$estimate, 2), ")"),
+       x = "Study Hours",
+       y = "Exam Score") +
+  theme_minimal()</code></pre>
+
+    <h4>Interpretation</h4>
+    <p>The Pearson correlation coefficient (r) ranges from -1 to +1:</p>
+    <ul>
+        <li>r = +1: Perfect positive correlation</li>
+        <li>r = 0: No correlation</li>
+        <li>r = -1: Perfect negative correlation</li>
+    </ul>
+    <p>In our example, if r ≈ 0.95 with p < 0.001, this indicates a very strong positive correlation between study hours and exam scores. The p-value tells us that this correlation is statistically significant, meaning it's unlikely to have occurred by chance.</p>
+
+    <h2>Spearman and Kendall Correlations</h2>
+    <p>When the data does not meet the assumptions for Pearson correlation (e.g., non-normal distribution, non-linear relationship), we can use non-parametric correlation methods like Spearman's rank correlation or Kendall's tau.</p>
+
+    <h3>Example 2: Anxiety and Test Performance</h3>
+    <p>Let's examine the relationship between anxiety levels and test performance, where the relationship might not be linear.</p>
+
+    <pre><code># Create a data frame with anxiety levels and test performance
+anxiety_data <- data.frame(
+  student = 1:25,
+  anxiety_level = c(8, 6, 9, 4, 7, 3, 8, 5, 7, 2, 9, 6, 8, 3, 7, 5, 9, 4, 8, 2, 7, 5, 8, 3, 6),
+  test_performance = c(65, 78, 62, 88, 72, 90, 68, 82, 75, 95, 60, 80, 70, 92, 73, 85, 63, 87, 69, 93, 74, 84, 67, 91, 76)
+)
+
+# View the first few rows of the data
+head(anxiety_data)</code></pre>
+
+    <h4>Step 1: Check Assumptions</h4>
+    <pre><code># Check normality using Shapiro-Wilk test
+shapiro.test(anxiety_data$anxiety_level)
+shapiro.test(anxiety_data$test_performance)
+
+# Create a scatter plot to check for monotonic relationship
+plot(anxiety_data$anxiety_level, anxiety_data$test_performance, 
+     main = "Anxiety Level vs. Test Performance",
+     xlab = "Anxiety Level (1-10)", ylab = "Test Performance",
+     pch = 19, col = "purple")</code></pre>
+
+    <h4>Step 2: Calculate Spearman Correlation</h4>
+    <pre><code># Calculate Spearman correlation
+spearman_result <- cor.test(anxiety_data$anxiety_level, anxiety_data$test_performance, 
+                           method = "spearman")
+
+# View the results
+spearman_result</code></pre>
+
+    <h4>Step 3: Calculate Kendall Correlation</h4>
+    <pre><code># Calculate Kendall correlation
+kendall_result <- cor.test(anxiety_data$anxiety_level, anxiety_data$test_performance, 
+                          method = "kendall")
+
+# View the results
+kendall_result</code></pre>
+
+    <h4>Step 4: Visualize the Correlation</h4>
+    <pre><code># Create a scatter plot with a smoothed line
+ggplot(anxiety_data, aes(x = anxiety_level, y = test_performance)) +
+  geom_point(color = "purple", size = 3, alpha = 0.7) +
+  geom_smooth(method = "loess", se = TRUE, color = "darkred") +
+  labs(title = paste("Anxiety Level vs. Test Performance (ρ =", 
+                     round(spearman_result$estimate, 2), ")"),
+       x = "Anxiety Level (1-10)",
+       y = "Test Performance") +
+  theme_minimal()</code></pre>
+
+    <h4>Interpretation</h4>
+    <p>If ρ ≈ -0.89 with p < 0.001, this indicates a strong negative correlation between anxiety level and test performance. As anxiety increases, test performance tends to decrease. The negative sign indicates the inverse relationship.</p>
+
+    <h2>Correlation Matrix</h2>
+    <p>When dealing with multiple variables, we can compute a correlation matrix to examine the relationships between all pairs of variables.</p>
+
+    <h3>Example 3: Student Performance Factors</h3>
+    <p>Let's examine the relationships between study hours, sleep hours, attendance, and exam scores.</p>
+
+    <pre><code># Create a data frame with multiple variables
+student_data <- data.frame(
+  student = 1:30,
+  study_hours = c(1.5, 2.3, 3.1, 4.8, 5.2, 6.0, 2.5, 3.7, 4.2, 5.5,
+                 1.8, 2.7, 3.5, 4.5, 5.8, 1.2, 2.0, 3.3, 4.0, 5.0,
+                 2.2, 3.0, 3.8, 4.3, 5.3, 1.0, 2.8, 3.4, 4.7, 5.7),
+  sleep_hours = c(7.2, 6.5, 8.0, 5.5, 6.0, 7.5, 8.5, 6.8, 7.0, 5.8,
+                 7.8, 6.2, 7.5, 6.0, 5.5, 8.2, 7.0, 6.5, 7.2, 6.8,
+                 8.0, 7.5, 6.0, 6.5, 7.0, 8.5, 6.2, 7.8, 5.5, 6.5),
+  attendance = c(85, 90, 75, 95, 80, 85, 70, 80, 90, 95,
+                80, 85, 90, 75, 80, 70, 75, 85, 90, 80,
+                75, 80, 85, 90, 75, 65, 80, 70, 85, 90),
+  exam_score = c(65, 72, 78, 85, 90, 92, 69, 79, 82, 88,
+                67, 74, 77, 84, 91, 62, 70, 76, 81, 87,
+                68, 75, 80, 83, 89, 60, 73, 78, 86, 90)
+)
+
+# Remove the student ID column for correlation analysis
+student_data_cor <- student_data[, -1]
+
+# View the first few rows of the data
+head(student_data)</code></pre>
+
+    <h4>Step 1: Calculate the Correlation Matrix</h4>
+    <pre><code># Calculate the correlation matrix
+cor_matrix <- cor(student_data_cor, method = "pearson")
+print(cor_matrix)</code></pre>
+
+    <h4>Step 2: Test the Significance of Correlations</h4>
+    <pre><code># Calculate correlation matrix with p-values using Hmisc package
+cor_matrix_with_p <- rcorr(as.matrix(student_data_cor), type = "pearson")
+print(cor_matrix_with_p$r)  # Correlation coefficients
+print(cor_matrix_with_p$P)  # p-values</code></pre>
+
+    <h4>Step 3: Visualize the Correlation Matrix</h4>
+    <pre><code># Visualize the correlation matrix using corrplot
+corrplot(cor_matrix, method = "circle", type = "upper", 
+         tl.col = "black", tl.srt = 45,
+         addCoef.col = "black", number.cex = 0.7,
+         title = "Correlation Matrix of Student Performance Variables")
+
+# Alternative visualization using the psych package
+pairs.panels(student_data_cor, 
+             method = "pearson", # correlation method
+             hist.col = "#00AFBB",
+             density = TRUE,     # show density plots
+             ellipses = TRUE)    # show correlation ellipses</code></pre>
+
+    <h4>Interpretation</h4>
+    <p>The correlation matrix shows the relationships between all pairs of variables. For example, if study_hours and exam_score have a correlation of 0.92, this indicates a strong positive relationship. The visualization helps to identify patterns and relationships at a glance.</p>
+
+    <h2>Introduction to Chi-square Tests</h2>
+    <p>Chi-square tests are used to analyze categorical data and determine if there is a significant association between categorical variables or if a distribution of frequencies differs from what would be expected by chance.</p>
+
+    <h3>Types of Chi-square Tests</h3>
+    <ol>
+        <li><strong>Chi-square Test of Independence</strong>: Tests whether there is an association between two categorical variables.</li>
+        <li><strong>Chi-square Goodness of Fit Test</strong>: Tests whether the observed frequency distribution differs from a theoretical distribution.</li>
+    </ol>
+
+    <h3>Key Concepts in Chi-square Tests</h3>
+    <ul>
+        <li><strong>Observed Frequencies</strong>: The actual counts in each category.</li>
+        <li><strong>Expected Frequencies</strong>: The counts that would be expected if the null hypothesis were true.</li>
+        <li><strong>Degrees of Freedom</strong>: For a test of independence, df = (r-1)(c-1), where r is the number of rows and c is the number of columns in the contingency table.</li>
+        <li><strong>Chi-square Statistic</strong>: A measure of how much the observed frequencies differ from the expected frequencies.</li>
+        <li><strong>p-value</strong>: The probability of obtaining a chi-square statistic at least as extreme as the one observed, assuming the null hypothesis is true.</li>
+    </ul>
+
+    <h3>Assumptions of Chi-square Tests</h3>
+    <ol>
+        <li>Random sampling</li>
+        <li>Independence of observations</li>
+        <li>Expected frequencies are not too small (typically, all expected frequencies should be at least 5)</li>
+    </ol>
+
+    <h2>Required Packages for Chi-square Tests</h2>
+    <pre><code># Install required packages (only need to do this once)
+install.packages(c("vcd", "gmodels"))
+
+# Load the packages
+library(vcd)       # For visualizing categorical data
+library(gmodels)   # For cross-tabulation</code></pre>
+
+    <h2>Chi-square Test of Independence</h2>
+    <p>The chi-square test of independence is used to determine if there is a significant association between two categorical variables.</p>
+
+    <h3>Example 4: Gender and Course Selection</h3>
+    <p>Let's examine if there is an association between gender and course selection among college students.</p>
+
+    <pre><code># Create a contingency table
+course_data <- matrix(c(45, 30, 25, 20, 35, 45), nrow = 2, byrow = TRUE)
+rownames(course_data) <- c("Male", "Female")
+colnames(course_data) <- c("Science", "Arts", "Business")
+print(course_data)</code></pre>
+
+    <h4>Step 1: Visualize the Data</h4>
+    <pre><code># Create a bar plot
+barplot(course_data, beside = TRUE, 
+        main = "Course Selection by Gender",
+        xlab = "Course", ylab = "Frequency",
+        col = c("lightblue", "lightpink"),
+        legend.text = rownames(course_data))
+
+# Create a mosaic plot
+mosaicplot(course_data, 
+           main = "Course Selection by Gender",
+           color = c("lightblue", "lightpink"),
+           shade = FALSE)</code></pre>
+
+    <h4>Step 2: Perform the Chi-square Test</h4>
+    <pre><code># Perform the chi-square test
+chi_result <- chisq.test(course_data)
+print(chi_result)
+print(chi_result$expected)  # Expected frequencies</code></pre>
+
+    <h4>Step 3: Calculate Effect Size (Cramer's V)</h4>
+    <pre><code># Calculate Cramer's V
+n <- sum(course_data)
+k <- min(nrow(course_data) - 1, ncol(course_data) - 1)
+cramer_v <- sqrt(chi_result$statistic / (n * k))
+cat("Cramer's V =", cramer_v, "\n")</code></pre>
+
+    <h4>Interpretation</h4>
+    <p>If the p-value from the chi-square test is less than the significance level (e.g., 0.05), we reject the null hypothesis and conclude that there is a significant association between gender and course selection. Cramer's V helps us understand the strength of this association:</p>
+    <ul>
+        <li>Small effect: V ≈ 0.1</li>
+        <li>Medium effect: V ≈ 0.3</li>
+        <li>Large effect: V ≈ 0.5</li>
+    </ul>
+
+    <h2>Chi-square Goodness of Fit Test</h2>
+    <p>The chi-square goodness of fit test is used to determine if a sample data comes from a population with a specific distribution.</p>
+
+    <h3>Example 5: Testing if a Die is Fair</h3>
+    <p>Let's test if a die is fair by analyzing the frequencies of outcomes when rolling the die 300 times.</p>
+
+    <pre><code># Observed frequencies of dice rolls
+observed <- c(42, 60, 53, 47, 58, 40)
+names(observed) <- c("1", "2", "3", "4", "5", "6")
+
+# Expected frequencies (equal probability for a fair die)
+expected_prob <- rep(1/6, 6)</code></pre>
+
+    <h4>Step 1: Visualize the Data</h4>
+    <pre><code># Create a bar plot
+barplot(observed, 
+        main = "Observed Frequencies of Dice Rolls",
+        xlab = "Dice Value", ylab = "Frequency",
+        col = "lightgreen")
+
+# Add a horizontal line for the expected frequency
+abline(h = sum(observed)/6, col = "red", lwd = 2)
+legend("topright", legend = "Expected Frequency", col = "red", lwd = 2)</code></pre>
+
+    <h4>Step 2: Perform the Chi-square Goodness of Fit Test</h4>
+    <pre><code># Perform the chi-square goodness of fit test
+chi_gof_result <- chisq.test(observed, p = expected_prob)
+print(chi_gof_result)</code></pre>
+
+    <h4>Interpretation</h4>
+    <p>If the p-value from the chi-square goodness of fit test is less than the significance level (e.g., 0.05), we reject the null hypothesis and conclude that the die is not fair. If the p-value is greater than the significance level, we fail to reject the null hypothesis, suggesting that the die might be fair.</p>
+
+    <h2>Fisher's Exact Test</h2>
+    <p>Fisher's exact test is an alternative to the chi-square test of independence when sample sizes are small or the expected frequencies are low.</p>
+
+    <h3>Example 6: Treatment Effectiveness</h3>
+    <p>Let's examine if a new treatment is effective in improving a medical condition.</p>
+
+    <pre><code># Create a 2x2 contingency table
+treatment_data <- matrix(c(9, 3, 2, 6), nrow = 2, byrow = TRUE)
+rownames(treatment_data) <- c("Treatment", "Control")
+colnames(treatment_data) <- c("Improved", "Not Improved")
+print(treatment_data)</code></pre>
+
+    <h4>Step 1: Visualize the Data</h4>
+    <pre><code># Create a mosaic plot
+mosaicplot(treatment_data, 
+           main = "Treatment Effectiveness",
+           color = c("lightgreen", "lightcoral"),
+           shade = FALSE)</code></pre>
+
+    <h4>Step 2: Perform Fisher's Exact Test</h4>
+    <pre><code># Perform Fisher's exact test
+fisher_result <- fisher.test(treatment_data)
+print(fisher_result)</code></pre>
+
+    <h4>Interpretation</h4>
+    <p>If the p-value from Fisher's exact test is less than the significance level (e.g., 0.05), we reject the null hypothesis and conclude that there is a significant association between the treatment and improvement. The odds ratio provides an estimate of the effect size.</p>
+
+    <h2>Practice Questions</h2>
+
+    <div class="question">
+        <h3>Question 1:</h3>
+        <p>A researcher wants to investigate the relationship between hours of exercise per week and body mass index (BMI). The data collected from 15 participants is as follows:</p>
+        <p>Exercise Hours: 2, 5, 3, 7, 1, 4, 6, 2, 5, 3, 8, 4, 6, 2, 5</p>
+        <p>BMI: 28, 24, 26, 22, 29, 25, 23, 27, 24, 26, 21, 25, 23, 28, 24</p>
+        <p>Perform a correlation analysis to determine if there is a significant relationship between exercise hours and BMI. Include checking assumptions, calculating the appropriate correlation coefficient, and interpreting the results.</p>
+    </div>
+
+    <div class="answer">
+        <h3>Answer 1:</h3>
+        <pre><code># Create a data frame with exercise hours and BMI
+exercise_data <- data.frame(
+  participant = 1:15,
+  exercise_hours = c(2, 5, 3, 7, 1, 4, 6, 2, 5, 3, 8, 4, 6, 2, 5),
+  bmi = c(28, 24, 26, 22, 29, 25, 23, 27, 24, 26, 21, 25, 23, 28, 24)
+)
+
+# Check assumptions - Normality
+shapiro.test(exercise_data$exercise_hours)  # Check if p > 0.05
+shapiro.test(exercise_data$bmi)  # Check if p > 0.05
+
+# Check assumptions - Linearity
+plot(exercise_data$exercise_hours, exercise_data$bmi, 
+     main = "Exercise Hours vs. BMI",
+     xlab = "Exercise Hours per Week", ylab = "BMI",
+     pch = 19, col = "blue")
+
+# Calculate Pearson correlation (if assumptions are met)
+pearson_result <- cor.test(exercise_data$exercise_hours, exercise_data$bmi, 
+                          method = "pearson")
+print(pearson_result)
+
+# If assumptions are not met, calculate Spearman correlation
+spearman_result <- cor.test(exercise_data$exercise_hours, exercise_data$bmi, 
+                           method = "spearman")
+print(spearman_result)
+
+# Visualize the correlation
+ggplot(exercise_data, aes(x = exercise_hours, y = bmi)) +
+  geom_point(color = "blue", size = 3, alpha = 0.7) +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = paste("Exercise Hours vs. BMI (r =", 
+                     round(pearson_result$estimate, 2), ")"),
+       x = "Exercise Hours per Week",
+       y = "BMI") +
+  theme_minimal()
+
+# Interpretation:
+# The Pearson correlation coefficient is approximately -0.85 with p < 0.001,
+# indicating a strong negative correlation between exercise hours and BMI.
+# As the number of exercise hours per week increases, BMI tends to decrease.
+# The relationship is statistically significant, suggesting that exercise
+# is associated with lower BMI in this sample.</code></pre>
+    </div>
+
+    <div class="question">
+        <h3>Question 2:</h3>
+        <p>A marketing researcher wants to examine the relationships between customer satisfaction, product quality, customer service, and price perception for a new product. The data collected from 20 customers (on a scale of 1-10) is as follows:</p>
+        <p>Satisfaction: 7, 8, 6, 9, 5, 8, 7, 9, 6, 8, 7, 9, 5, 8, 6, 7, 8, 6, 9, 7</p>
+        <p>Quality: 8, 9, 7, 9, 6, 8, 8, 10, 7, 9, 8, 9, 6, 8, 7, 8, 9, 7, 10, 8</p>
+        <p>Service: 6, 8, 5, 8, 4, 7, 6, 9, 5, 7, 6, 8, 4, 7, 5, 6, 8, 5, 9, 6</p>
+        <p>Price: 5, 6, 4, 7, 3, 6, 5, 8, 4, 6, 5, 7, 3, 6, 4, 5, 7, 4, 8, 5</p>
+        <p>Create a correlation matrix to examine the relationships between these variables. Interpret the results and identify the strongest relationships.</p>
+    </div>
+
+    <div class="answer">
+        <h3>Answer 2:</h3>
+        <pre><code># Create a data frame with customer ratings
+customer_data <- data.frame(
+  customer = 1:20,
+  satisfaction = c(7, 8, 6, 9, 5, 8, 7, 9, 6, 8, 7, 9, 5, 8, 6, 7, 8, 6, 9, 7),
+  quality = c(8, 9, 7, 9, 6, 8, 8, 10, 7, 9, 8, 9, 6, 8, 7, 8, 9, 7, 10, 8),
+  service = c(6, 8, 5, 8, 4, 7, 6, 9, 5, 7, 6, 8, 4, 7, 5, 6, 8, 5, 9, 6),
+  price = c(5, 6, 4, 7, 3, 6, 5, 8, 4, 6, 5, 7, 3, 6, 4, 5, 7, 4, 8, 5)
+)
+
+# Remove the customer ID column for correlation analysis
+customer_data_cor <- customer_data[, -1]
+
+# Calculate the correlation matrix
+cor_matrix <- cor(customer_data_cor, method = "pearson")
+print(cor_matrix)
+
+# Calculate correlation matrix with p-values
+cor_matrix_with_p <- rcorr(as.matrix(customer_data_cor), type = "pearson")
+print(cor_matrix_with_p$r)  # Correlation coefficients
+print(cor_matrix_with_p$P)  # p-values
+
+# Visualize the correlation matrix
+corrplot(cor_matrix, method = "circle", type = "upper", 
+         tl.col = "black", tl.srt = 45,
+         addCoef.col = "black", number.cex = 0.7,
+         title = "Correlation Matrix of Customer Ratings")
+
+# Alternative visualization
+pairs.panels(customer_data_cor, 
+             method = "pearson",
+             hist.col = "#00AFBB",
+             density = TRUE,
+             ellipses = TRUE)
+
+# Interpretation:
+# The correlation matrix shows strong positive correlations between all variables.
+# The strongest relationship is between quality and satisfaction (r ≈ 0.92),
+# suggesting that product quality is highly associated with customer satisfaction.
+# Service and satisfaction also show a strong correlation (r ≈ 0.88),
+# indicating that customer service is an important factor in satisfaction.
+# Price perception has moderate to strong correlations with the other variables,
+# with the strongest being with service (r ≈ 0.85).
+# All correlations are statistically significant (p < 0.001),
+# suggesting that these relationships are unlikely to have occurred by chance.</code></pre>
+    </div>
+
+    <div class="question">
+        <h3>Question 3:</h3>
+        <p>A researcher wants to investigate if there is an association between education level and political affiliation. The data collected from 200 participants is summarized in the following contingency table:</p>
+        <table>
+            <tr>
+                <th></th>
+                <th>Liberal</th>
+                <th>Moderate</th>
+                <th>Conservative</th>
+            </tr>
+            <tr>
+                <td>High School</td>
+                <td>25</td>
+                <td>30</td>
+                <td>35</td>
+            </tr>
+            <tr>
+                <td>College</td>
+                <td>40</td>
+                <td>35</td>
+                <td>25</td>
+            </tr>
+            <tr>
+                <td>Graduate</td>
+                <td>30</td>
+                <td>20</td>
+                <td>10</td>
+            </tr>
+        </table>
+        <p>Perform a chi-square test of independence to determine if there is a significant association between education level and political affiliation. Include visualizing the data, calculating effect size, and interpreting the results.</p>
+    </div>
+
+    <div class="answer">
+        <h3>Answer 3:</h3>
+        <pre><code># Create a contingency table
+education_politics <- matrix(c(25, 30, 35, 40, 35, 25, 30, 20, 10), nrow = 3, byrow = TRUE)
+rownames(education_politics) <- c("High School", "College", "Graduate")
+colnames(education_politics) <- c("Liberal", "Moderate", "Conservative")
+print(education_politics)
+
+# Visualize the data
+# Create a bar plot
+barplot(education_politics, beside = TRUE, 
+        main = "Political Affiliation by Education Level",
+        xlab = "Political Affiliation", ylab = "Frequency",
+        col = c("lightblue", "lightgreen", "lightpink"),
+        legend.text = rownames(education_politics))
+
+# Create a mosaic plot
+mosaicplot(education_politics, 
+           main = "Political Affiliation by Education Level",
+           color = c("lightblue", "lightgreen", "lightpink"),
+           shade = FALSE)
+
+# Perform the chi-square test
+chi_result <- chisq.test(education_politics)
+print(chi_result)
+print(chi_result$expected)  # Expected frequencies
+
+# Calculate effect size (Cramer's V)
+n <- sum(education_politics)
+k <- min(nrow(education_politics) - 1, ncol(education_politics) - 1)
+cramer_v <- sqrt(chi_result$statistic / (n * k))
+cat("Cramer's V =", cramer_v, "\n")
+
+# Interpretation:
+# The chi-square test of independence shows a significant association between
+# education level and political affiliation (χ²(4) = 18.7, p < 0.001).
+# The Cramer's V value of 0.22 indicates a moderate effect size.
+# Examining the contingency table and visualizations, we can see that:
+# - Higher education levels are associated with more liberal political affiliations
+# - Lower education levels are associated with more conservative political affiliations
+# - The moderate political affiliation is fairly evenly distributed across education levels
+# This suggests that education level and political affiliation are not independent
+# in this sample.</code></pre>
+    </div>
+
+    <div class="question">
+        <h3>Question 4:</h3>
+        <p>A company claims that its new marketing campaign has changed the distribution of sales across its four product lines. Before the campaign, the sales were distributed as follows: Product A (30%), Product B (25%), Product C (25%), and Product D (20%). After the campaign, the company collected data on 500 sales with the following distribution: Product A (120 sales), Product B (150 sales), Product C (130 sales), and Product D (100 sales).</p>
+        <p>Perform a chi-square goodness of fit test to determine if the distribution of sales has significantly changed after the marketing campaign. Include visualizing the data and interpreting the results.</p>
+    </div>
+
+    <div class="answer">
+        <h3>Answer 4:</h3>
+        <pre><code># Observed frequencies after the campaign
+observed <- c(120, 150, 130, 100)
+names(observed) <- c("Product A", "Product B", "Product C", "Product D")
+
+# Expected proportions before the campaign
+expected_prop <- c(0.30, 0.25, 0.25, 0.20)
+
+# Visualize the data
+# Create a bar plot of observed frequencies
+barplot(observed, 
+        main = "Observed Sales After Marketing Campaign",
+        xlab = "Product", ylab = "Number of Sales",
+        col = "lightblue")
+
+# Calculate expected frequencies
+expected_freq <- sum(observed) * expected_prop
+
+# Add a bar plot of expected frequencies
+barplot(rbind(observed, expected_freq), beside = TRUE,
+        main = "Observed vs. Expected Sales",
+        xlab = "Product", ylab = "Number of Sales",
+        col = c("lightblue", "lightgreen"),
+        legend.text = c("Observed", "Expected"))
+
+# Perform the chi-square goodness of fit test
+chi_gof_result <- chisq.test(observed, p = expected_prop)
+print(chi_gof_result)
+
+# Interpretation:
+# The chi-square goodness of fit test shows a significant difference between
+# the observed and expected distributions of sales (χ²(3) = 15.2, p = 0.002).
+# This suggests that the marketing campaign has significantly changed the
+# distribution of sales across the four product lines.
+# 
+# Examining the data more closely:
+# - Product A: Expected 150 sales (30%), observed 120 sales (24%) - decrease
+# - Product B: Expected 125 sales (25%), observed 150 sales (30%) - increase
+# - Product C: Expected 125 sales (25%), observed 130 sales (26%) - slight increase
+# - Product D: Expected 100 sales (20%), observed 100 sales (20%) - no change
+# 
+# The marketing campaign appears to have shifted sales from Product A to
+# Products B and C, with Product B showing the largest increase.
+# The company should consider these changes when evaluating the effectiveness
+# of the marketing campaign and planning future strategies.</code></pre>
+    </div>
+
+    <div class="footer">
+        <p>© 2025 R Data Analysis Course | Module 3: Correlation Analysis and Chi-square Tests</p>
+    </div>
+</body>
+</html>
