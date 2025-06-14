@@ -1,3 +1,6 @@
+# Module 3a:Chi-square Tests
+
+
 ## Introduction to Chi-square Tests
 
 Chi-square tests are used to analyze categorical data and determine if there is a significant association between categorical variables.
